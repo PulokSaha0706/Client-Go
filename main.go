@@ -6,6 +6,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
@@ -59,6 +60,36 @@ func main() {
 	}
 
 	fmt.Println("✅ Deployment created: %q\n", result.GetObjectMeta().GetName())
+
+	// ---------------- Service ----------------
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "bookapi-service",
+		},
+		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceTypeClusterIP,
+			Selector: map[string]string{
+				"app": "bookapi",
+			},
+			Ports: []corev1.ServicePort{
+				{
+					Port:       9090,
+					TargetPort: intstrPtr(9090),
+				},
+			},
+		},
+	}
+	serviceClient := clientset.CoreV1().Services("default")
+	_, err = serviceClient.Create(context.TODO(), service, metav1.CreateOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("✅ Service created")
+}
+
+func intstrPtr(i int) intstr.IntOrString {
+	return intstr.FromInt(i)
 }
 
 func int32Ptr(i int32) *int32 { return &i }
