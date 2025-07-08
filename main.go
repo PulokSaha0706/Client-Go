@@ -41,7 +41,7 @@ func main() {
 						{
 							Name:    "bookapi-container",
 							Image:   "puloksaha/bookapi:latest",
-							Command: []string{"./BookApi", "start"},
+							Command: []string{"./BookApi", "start", "-p", "9090"},
 							Ports: []corev1.ContainerPort{
 								{ContainerPort: 9090},
 							},
